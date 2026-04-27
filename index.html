@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>Task Manager</h1>
+
+    <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
+    <button id="addTaskBtn">Hinzufügen</button>
+
+    <ul id="taskList"></ul>
+    
+    <span>Tasks:
+        <span id="taskCounter">0</span>
+    </span>
+
+    <template id="taskTemplate">
+        <li>
+            <span class="taskText"></span>
+            <button class="delete">X</button>
+        </li>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
