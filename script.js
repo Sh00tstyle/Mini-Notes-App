@@ -1,8 +1,8 @@
-const button = document.getElementById("addTaskBtn");
-const input = document.getElementById("taskInput");
-const list = document.getElementById("taskList");
-const counter = document.getElementById("taskCounter");
-const temp = document.getElementById("taskTemplate");
+const button = document.getElementById("addNoteButton");
+const titleInput = document.getElementById("noteTitleInput");
+const textInput = document.getElementById("noteTextInput");
+const list = document.getElementById("noteList");
+const template = document.getElementById("noteTemplate");
 
 const dataStorageID = "data";
 let data = [];
@@ -15,105 +15,94 @@ document.addEventListener("DOMContentLoaded", () => {
 
 button.addEventListener("click", submit);
 
-input.addEventListener("keydown", (event) => {
+titleInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
         event.preventDefault();
         submit();
     }
 });
 
-input.addEventListener("input", detectButtonState);
-
 list.addEventListener("click", (event) => {
-    const listItem = event.target.closest("li");
+    const article = event.target.closest("article");
 
-    if (!listItem) return;
+    if (!article) return;
 
     const deleteButton = event.target.closest(".delete");
-    const textElement = listItem.querySelector(".taskText");
-
+    
     if (deleteButton) {
-        removeTaskItem(textElement.textContent);
-    } else {
-        toggleCompleted(textElement.textContent);
-    }
+        const titleElement = article.querySelector(".noteTitle");
 
-    render();
+        removeNoteItem(titleElement.textContent);
+        event.stopPropagation();
+    }
 });
 
+titleInput.addEventListener("input", detectButtonState);
+
+textInput.addEventListener("input", detectButtonState);
+
 function submit() {
-    addTaskItem(input.value.trim());
+    addNoteItem(titleInput.value.trim(), textInput.value.trim());
     resetInput();
     detectButtonState();
-    render();
 }
 
 function detectButtonState() {
-    if (input.value.trim() === "") {
-        button.disabled = true;
+    if (titleInput.value.trim() !== "" && textInput.value.trim() !== "") {
+        button.disabled = false;
     }
     else {
-        button.disabled = false;
+        button.disabled = true;
     }
 }
 
-function getIndexByText(taskText) {
-    if (taskText === "") return -1;
+function getIndexByTitle(noteTitle) {
+    if (noteTitle === "") return -1;
 
     for (let i = 0; i < data.length; i++) {
-        if (data[i].text === taskText) return i;
+        if (data[i].title === noteTitle) return i;
     }
 
     return -1;
 }
 
-function addTaskItem(taskText) {
-    if (taskText === "" || getIndexByText(taskText) >= 0) return;
+function addNoteItem(noteTitle, noteText) {
+    if (noteTitle === "" || noteText === "" || getIndexByTitle(noteTitle) >= 0) return;
 
-    data.push({completed: false, text: taskText});
+    data.push({title: noteTitle, text: noteText});
     saveToFile();
+    render();
 }
 
-function removeTaskItem(taskText) {
-    const taskIndex = getIndexByText(taskText);
+function removeNoteItem(noteTitle) {
+    const noteIndex = getIndexByTitle(noteTitle);
 
-    if (taskIndex < 0) return;
+    if (noteIndex < 0) return;
 
-    data.splice(taskIndex, 1);
+    data.splice(noteIndex, 1);
     saveToFile();
-}
-
-function toggleCompleted(taskText) {
-    const taskIndex = getIndexByText(taskText);
-
-    if (taskIndex < 0) return;
-
-    data[taskIndex].completed = !data[taskIndex].completed;
-    saveToFile();
+    render();
 }
 
 function resetInput() {
-    input.value = "";
-    input.focus();
+    titleInput.value = "";
+    textInput.value = "";
+    titleInput.focus();
 }
 
 function render() {
     list.innerHTML = "";
 
     for (let i = 0; i < data.length; i++) {
-        const clone = temp.content.cloneNode(true);
-        const listItem = clone.querySelector("li");
-        const textElement = listItem.querySelector(".taskText");
+        const clone = template.content.cloneNode(true);
+        const titleElement = clone.querySelector(".noteTitle");
+        const textElement = clone.querySelector(".noteText");
 
+        titleElement.textContent = data[i].title;
         textElement.textContent = data[i].text;
 
-        if (data[i].completed)
-            listItem.classList.add("completed");
-
-        list.appendChild(listItem);
+        list.appendChild(clone);
     }
-
-    counter.textContent = data.length;
 }
 
 function saveToFile() {
@@ -139,8 +128,8 @@ function readFromFile() {
         data = data.filter(item => 
             item !== null &&
             typeof item === 'object' &&
-            typeof item.text === 'string' &&
-            typeof item.completed === 'boolean'
+            typeof item.title === 'string' &&
+            typeof item.text === 'string'
         );
     }
     catch {

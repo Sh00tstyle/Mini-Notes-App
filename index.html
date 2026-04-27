@@ -3,26 +3,30 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task Manager</title>
+    <title>Notizen</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <h1>Task Manager</h1>
 
-    <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
-    <button id="addTaskBtn">Hinzufügen</button>
-
-    <ul id="taskList"></ul>
+    <div>
+        <input type="text" id="noteTitleInput" placeholder="Neue Notiz..." />
+    </div>
     
-    <span>Tasks:
-        <span id="taskCounter">0</span>
-    </span>
+    <div>
+        <textarea id="noteTextInput" cols="30" rows="5"></textarea>
+    </div>
 
-    <template id="taskTemplate">
-        <li>
-            <span class="taskText"></span>
-            <button class="delete">X</button>
-        </li>
+    <button id="addNoteButton">Hinzufügen</button>
+
+    <div id="noteList"></div>
+
+    <template id="noteTemplate">
+        <article>
+            <h3 class="noteTitle"></h3>
+            <p class="noteText"></p>
+            <button class="delete">Löschen</button>
+        </article>
     </template>
 
     <script src="script.js"></script>

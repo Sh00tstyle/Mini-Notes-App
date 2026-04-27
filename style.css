@@ -5,22 +5,27 @@ body {
 
 input {
     padding: 8px;
+    margin-bottom: 10px;
+}
+
+textarea {
+    margin-bottom: 10px;
 }
 
 button {
     padding: 8px 12px;
+    margin-bottom: 20px;
 }
 
 button.delete {
     padding: 4px 4px;
-    margin-left: 10px;
-}
-
-li {
     margin-top: 10px;
 }
 
-.completed {
-    text-decoration: line-through;
-    color: gray;
+.noteTitle {
+    font-size: 20px;
+}
+
+.noteText {
+    font-size: 16px;
 }
