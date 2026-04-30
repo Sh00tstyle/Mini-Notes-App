@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <h1>Task Manager</h1>
+    <h1>Notizen</h1>
 
     <div>
         <input type="text" id="noteTitleInput" placeholder="Neue Notiz..." />
@@ -21,8 +21,10 @@
 
     <div id="noteList"></div>
 
+    <span id="listInfo" class="info">Keine Notizen hinzugefügt</span>
+
     <template id="noteTemplate">
-        <article>
+        <article data-id="-1">
             <h3 class="noteTitle"></h3>
             <p class="noteText"></p>
             <button class="delete">Löschen</button>

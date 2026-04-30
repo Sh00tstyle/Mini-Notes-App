@@ -12,6 +12,10 @@ textarea {
     margin-bottom: 10px;
 }
 
+span.info {
+    font-style: italic;
+}
+
 button {
     padding: 8px 12px;
     margin-bottom: 20px;

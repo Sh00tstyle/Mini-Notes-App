@@ -1,11 +1,15 @@
 const button = document.getElementById("addNoteButton");
 const titleInput = document.getElementById("noteTitleInput");
 const textInput = document.getElementById("noteTextInput");
+const listInfo = document.getElementById("listInfo");
 const list = document.getElementById("noteList");
 const template = document.getElementById("noteTemplate");
 
 const dataStorageID = "data";
 let data = [];
+
+const nextIDStorageID = "nextID";
+let nextID = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
     readFromFile();
@@ -30,9 +34,7 @@ list.addEventListener("click", (event) => {
     const deleteButton = event.target.closest(".delete");
     
     if (deleteButton) {
-        const titleElement = article.querySelector(".noteTitle");
-
-        removeNoteItem(titleElement.textContent);
+        removeNoteItem(Number(article.dataset.id));
         event.stopPropagation();
     }
 });
@@ -56,30 +58,31 @@ function detectButtonState() {
     }
 }
 
-function getIndexByTitle(noteTitle) {
-    if (noteTitle === "") return -1;
-
+function getIndexByID(noteID) {
     for (let i = 0; i < data.length; i++) {
-        if (data[i].title === noteTitle) return i;
+        if (data[i].id === noteID) return i;
     }
 
     return -1;
 }
 
 function addNoteItem(noteTitle, noteText) {
-    if (noteTitle === "" || noteText === "" || getIndexByTitle(noteTitle) >= 0) return;
+    if (noteTitle === "" || noteText === "") return;
 
-    data.push({title: noteTitle, text: noteText});
+    data.push({id: nextID, title: noteTitle, text: noteText});
+    nextID++;
+
     saveToFile();
     render();
 }
 
-function removeNoteItem(noteTitle) {
-    const noteIndex = getIndexByTitle(noteTitle);
+function removeNoteItem(noteID) {
+    const noteIndex = getIndexByID(noteID);
 
     if (noteIndex < 0) return;
-
+    
     data.splice(noteIndex, 1);
+
     saveToFile();
     render();
 }
@@ -93,11 +96,15 @@ function resetInput() {
 function render() {
     list.innerHTML = "";
 
-    for (let i = 0; i < data.length; i++) {
+    listInfo.hidden = data.length > 0;
+
+    for (let i = data.length - 1; i >= 0; i--) {
         const clone = template.content.cloneNode(true);
+        const articleElement = clone.querySelector("article");
         const titleElement = clone.querySelector(".noteTitle");
         const textElement = clone.querySelector(".noteText");
 
+        articleElement.dataset.id = data[i].id;
         titleElement.textContent = data[i].title;
         textElement.textContent = data[i].text;
 
@@ -106,21 +113,25 @@ function render() {
 }
 
 function saveToFile() {
-    const jsonText = JSON.stringify(data);
+    const jsonData = JSON.stringify(data);
+    const jsonNextID = JSON.stringify(nextID);
 
-    localStorage.setItem(dataStorageID, jsonText);
+    localStorage.setItem(dataStorageID, jsonData);
+    localStorage.setItem(nextIDStorageID, jsonNextID);
 }
 
 function readFromFile() {
-    const jsonText = localStorage.getItem(dataStorageID);
+    const jsonData = localStorage.getItem(dataStorageID);
+    const jsonNextID = localStorage.getItem(nextIDStorageID);
 
-    if (!jsonText) return;
+    if (!jsonData) return;
 
     try {
-        data = JSON.parse(jsonText);
+        data = JSON.parse(jsonData);
 
         if(!Array.isArray(data)) {
             data = [];
+            nextID = 0;
             return;
         }
 
@@ -128,11 +139,26 @@ function readFromFile() {
         data = data.filter(item => 
             item !== null &&
             typeof item === 'object' &&
+            typeof item.id === 'number' &&
             typeof item.title === 'string' &&
             typeof item.text === 'string'
         );
+
+        if(!jsonNextID) {
+            let highestUsedID = -1;
+            
+            for(let i = 0; i < data.length; i++) {
+                if(data[i].id > highestUsedID)
+                    highestUsedID = data[i].id;
+            }
+            
+            nextID = highestUsedID + 1;
+        } else {
+            nextID = JSON.parse(jsonNextID);
+        }
     }
     catch {
         data = [];
+        nextID = 0;
     }
 }
