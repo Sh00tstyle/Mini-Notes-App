@@ -11,19 +11,29 @@ let data = [];
 const nextIDStorageID = "nextID";
 let nextID = 0;
 
+let currentEditID = -1;
+
 document.addEventListener("DOMContentLoaded", () => {
     readFromFile();
     detectButtonState();
     render();
 });
 
+document.addEventListener("keydown", (event) => {
+    if(event.key === "Escape" && currentEditID >= 0) {
+        event.preventDefault();
+        exitEditNote();
+    }
+});
+
 button.addEventListener("click", submit);
 
-titleInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        submit();
-    }
+list.addEventListener("dblclick", (event) => {
+    const article = event.target.closest("article");
+
+    if (!article) return;
+
+    startEditNote(Number(article.dataset.id));
 });
 
 list.addEventListener("click", (event) => {
@@ -39,12 +49,60 @@ list.addEventListener("click", (event) => {
     }
 });
 
+titleInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        submit();
+    }
+});
+
 titleInput.addEventListener("input", detectButtonState);
 
 textInput.addEventListener("input", detectButtonState);
 
 function submit() {
-    addNoteItem(titleInput.value.trim(), textInput.value.trim());
+    if(currentEditID >= 0) {
+        applyEditNote();
+    } else {
+        addNoteItem(titleInput.value.trim(), textInput.value.trim());
+    }
+}
+
+function startEditNote(noteID) {
+    currentEditID = noteID;
+
+    const dataEntryIndex = getIndexByID(currentEditID);
+
+    titleInput.value = data[dataEntryIndex].title;
+    textInput.value = data[dataEntryIndex].text;
+
+    detectButtonState();
+
+    textInput.focus();
+
+    button.textContent = "Änderungen speichern";
+}
+
+function applyEditNote() {
+    if(titleInput.value.trim() === "" || textInput.value.trim() === "") return;
+    
+    const dataEntryIndex = getIndexByID(currentEditID);
+
+    if (dataEntryIndex < 0) return;
+
+    data[dataEntryIndex].title = titleInput.value;
+    data[dataEntryIndex].text = textInput.value;
+
+    saveToFile();
+    exitEditNote();
+    render();
+}
+
+function exitEditNote() {
+    currentEditID = -1;
+
+    button.textContent = "Hinzufügen";
+
     resetInput();
     detectButtonState();
 }
@@ -64,6 +122,9 @@ function getIndexByID(noteID) {
     }
 
     return -1;
+
+    // Alternatively:
+    // return data.findIndex(item => item.id === noteID);
 }
 
 function addNoteItem(noteTitle, noteText) {
@@ -73,6 +134,8 @@ function addNoteItem(noteTitle, noteText) {
     nextID++;
 
     saveToFile();
+    resetInput();
+    detectButtonState();
     render();
 }
 
